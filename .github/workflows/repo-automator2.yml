@@ -1,0 +1,43 @@
+name: 'Repo Automator'
+on:
+  issues:
+    types:
+      - opened
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - converted_to_draft
+      - ready_for_review
+    branches:
+      - develop
+      - main
+
+jobs:
+  Validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: 10up/action-repo-automator@trunk
+        with:
+          fail-label: 'needs:feedback'
+          pass-label: 'needs:code-review'
+          conflict-label: 'needs:refresh'
+          issue-welcome-message: |
+            Welcome {author}! 👋 Thank you for opening your first issue! We're glad to have you here and appreciate your contribution. If you need any help or have questions, feel free to ask. Happy coding! 🚀
+          reviewers: |
+            GITHUB_USERNAME
+            team:GITHUB_TEAM_SLUG
+          issue-comment: |
+            Hi {author},
+
+            Thank you for reporting this issue! We appreciate your feedback and will look into it promptly.
+          comment-ignore-users: |
+            GITHUB_USERNAME
+            team:GITHUB_TEAM_SLUG
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
