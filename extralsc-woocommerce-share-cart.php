@@ -168,7 +168,7 @@ function extralsc_wsc_template_redirect()
 add_action('template_redirect', 'extralsc_wsc_template_redirect');
 
 // Shortcode för att visa kundvagn baserat på cart_id
-function extralsc_display_cart_by_id_shortcode()
+function extralsc_display_cart_by_id_shortcode_legacy()
 {
     if (isset($_GET['cart_id'])) {
         $cart_id = sanitize_text_field($_GET['cart_id']); // Sanera input
@@ -214,6 +214,34 @@ function extralsc_display_cart_by_id_shortcode()
         return '<p>Ingen kundvagn angiven.</p>';
     }
 }
+
+function extralsc_display_cart_by_id_shortcode()
+{
+    if (isset($_GET['cart_id'])) {
+        $cart_id = sanitize_text_field($_GET['cart_id']); // Sanera input
+
+        $cart_data = extralsc_get_cart_data($cart_id);
+
+        if ($cart_data) {
+            WC()->cart->empty_cart();
+            
+            foreach ($cart_data->items as $item) {
+                $item = (object) $item;
+                WC()->cart->add_to_cart($item->product_id, $item->quantity);
+            }
+
+            echo __('Loading...', 'extralsc-wsc');
+            $cart_url = wc_get_cart_url();
+            wp_safe_redirect($cart_url);
+            
+        } else {
+            return '<p>Kundvagnen kunde inte hittas.</p>';
+        }
+    } else {
+        return '<p>Ingen kundvagn angiven.</p>';
+    }
+}
+
 add_shortcode('display_cart', 'extralsc_display_cart_by_id_shortcode');
 
 // Funktion för att hämta kundvagnsdata och produktinformation
