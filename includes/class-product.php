@@ -6,18 +6,18 @@ class Extralsc_WSC_Product {
     public $description;
 
     public function __construct($product_id) {
-        // Hämta produkten med WooCommerce WC_Product klass
+        // Retrieve the product using the WooCommerce WC_Product class
         $product = wc_get_product($product_id);
         
         if ($product) {
-            // Fyll i klassens egenskaper baserat på produktens data
+            // Fill in the class properties based on the product data
             $this->product_id = $product->get_id();
             $this->name = $product->get_name();
             $this->price = $product->get_price();
             $this->description = $product->get_description();
         } else {
-            // Hantera om produkten inte hittas
-            error_log("Produkt med ID $product_id hittades inte.");
+            // Handle if product is not found
+            error_log("Product with ID $product_id could not be found.");
         }
     }
 }

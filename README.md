@@ -24,7 +24,7 @@ This plugin provides a custom functionality where the user can share their cart 
 
 ### Display Shared Cart
 
-To display the shared cart, you can use the shortcode `[display_cart]` in any page or post. You need to pass the `cart_id` as a URL parameter, e.g., `yourwebsite.com/shared-cart?cart_id=123`. The plugin will retrieve the cart's contents and display it with product details.
+To display the shared cart, you can use the shortcode `[extralsc_wsc_cart]` in any page or post. You need to pass the `cart_id` as a URL parameter, e.g., `yourwebsite.com/shared-cart?cart_id=123`. The plugin will retrieve the cart's contents and display it with product details.
 
 ### Add to Cart and Checkout
 
@@ -35,14 +35,14 @@ When viewing the shared cart, you can proceed to checkout by pressing the "Proce
 You can use the following shortcode in your pages or posts:
 
 ```plaintext
-[display_cart]
+[extralsc_wsc_cart]
 ```
 
 This will display the contents of the shared cart, provided the `cart_id` is passed in the URL.
 
 For example:
 - URL: `https://yourwebsite.com/shared-cart?cart_id=123`
-- Shortcode used: `[display_cart]`
+- Shortcode used: `[extralsc_wsc_cart]`
 
 ### Creating Shared Cart Links
 
@@ -154,7 +154,7 @@ The **WooCommerce Share Cart System** also provides custom **API endpoints** tha
 
 3. **Set Up the Plugin**:
     - No additional setup is required. The plugin automatically creates the necessary database tables during activation.
-    - You can use the `[display_cart]` shortcode to display shared carts on your website.
+    - You can use the `[extralsc_wsc_cart]` shortcode to display shared carts on your website.
 
 ## Plugin Structure
 
@@ -162,7 +162,7 @@ This plugin consists of several key components:
 
 - **Database Tables**: The plugin creates several tables in the database to store cart data, cart items, cart sharing information, and cart sessions.
   
-- **Shortcode**: The `[display_cart]` shortcode is used to display shared carts.
+- **Shortcode**: The `[extralsc_wsc_cart]` shortcode is used to display shared carts.
 
 - **REST API**: The plugin uses custom REST API endpoints to interact with the cart data programmatically.
 

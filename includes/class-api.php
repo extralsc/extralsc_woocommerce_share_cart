@@ -1,5 +1,5 @@
 <?php
-// Ladda klasser för varukorg, produkter, varukorgsobjekt, delning och sessioner
+// Load classes for cart, products, cart objects, sharing, and sessions
 require_once plugin_dir_path(__FILE__) . 'class-cart.php';
 require_once plugin_dir_path(__FILE__) . 'class-product.php';
 require_once plugin_dir_path(__FILE__) . 'class-cart-item.php';
@@ -9,7 +9,7 @@ require_once plugin_dir_path(__FILE__) . 'class-cart-session.php';  // Laddar Ca
 class Extralsc_WSC_API
 {
 
-    // Registrera REST API slutpunkter
+    // Register REST API endpoints
     public static function register_routes()
     {
         register_rest_route('extralsc-wsc/v1', '/add-to-woocommerce-cart', array(
@@ -18,49 +18,49 @@ class Extralsc_WSC_API
             'permission_callback' => '__return_true',
         ));
 
-        // Skapa varukorg
+        // Create cart
         register_rest_route('extralsc-wsc/v1', '/create-cart', array(
             'methods' => 'POST',
             'callback' => array('Extralsc_WSC_API', 'create_cart'),
             'permission_callback' => '__return_true', // Behörighetskontroll kan implementeras här
         ));
 
-        // Lägg till produkt till varukorg
+       // Add product to cart
         register_rest_route('extralsc-wsc/v1', '/add-to-cart', array(
             'methods' => 'POST',
             'callback' => array('Extralsc_WSC_API', 'add_to_cart'),
             'permission_callback' => '__return_true',
         ));
 
-        // Ta bort produkt från varukorg
+        // Remove product from cart
         register_rest_route('extralsc-wsc/v1', '/remove-from-cart', array(
             'methods' => 'DELETE',
             'callback' => array('Extralsc_WSC_API', 'remove_from_cart'),
             'permission_callback' => '__return_true',
         ));
 
-        // Dela varukorg
+        // Share cart
         register_rest_route('extralsc-wsc/v1', '/share-cart', array(
             'methods' => 'POST',
             'callback' => array('Extralsc_WSC_API', 'share_cart'),
             'permission_callback' => '__return_true',
         ));
 
-        // Hämta delade varukorgar
+        // Retrieve shared carts
         register_rest_route('extralsc-wsc/v1', '/shared-carts', array(
             'methods' => 'GET',
             'callback' => array('Extralsc_WSC_API', 'get_shared_carts'),
             'permission_callback' => '__return_true',
         ));
 
-        // Skapa session
+        // Create session
         register_rest_route('extralsc-wsc/v1', '/create-session', array(
             'methods' => 'POST',
             'callback' => array('Extralsc_WSC_API', 'create_session'),
             'permission_callback' => '__return_true',
         ));
 
-        // Hämta session
+        // Retrieve session
         register_rest_route('extralsc-wsc/v1', '/get-session', array(
             'methods' => 'GET',
             'callback' => array('Extralsc_WSC_API', 'get_session'),
@@ -68,13 +68,13 @@ class Extralsc_WSC_API
         ));
     }
 
-    // Skapa varukorg
+    // Create cart
     public static function create_cart(WP_REST_Request $request)
     {
         $user_id = get_current_user_id();
         if (!$user_id) {
             // return new WP_Error('no_user', 'No user is logged in', array('status' => 400));
-            $user_id = 'guest_' . uniqid(); // Exempel på en anonym användaridentifierare
+            $user_id = 'guest_' . uniqid() . microtime(); // Example of an anonymous user identifier, not very unique...
 
         }
 
@@ -82,7 +82,7 @@ class Extralsc_WSC_API
         return rest_ensure_response(['cart_id' => $cart->cart_id]);
     }
 
-    // Lägg till produkt i varukorg
+    // Add product to cart
     public static function add_to_cart(WP_REST_Request $request)
     {
         $cart_id = $request->get_param('cart_id');
@@ -97,7 +97,7 @@ class Extralsc_WSC_API
         return rest_ensure_response(['status' => 'success']);
     }
 
-    // Ta bort produkt från varukorg
+    // Remove product from cart
     public static function remove_from_cart(WP_REST_Request $request)
     {
         $cart_item_id = $request->get_param('cart_item_id');
@@ -110,7 +110,7 @@ class Extralsc_WSC_API
         return rest_ensure_response(['status' => 'success']);
     }
 
-    // Dela varukorg
+    // Share cart
     public static function share_cart(WP_REST_Request $request)
     {
         $cart_id = $request->get_param('cart_id');
@@ -124,7 +124,7 @@ class Extralsc_WSC_API
         return rest_ensure_response(['sharing_id' => $sharing->sharing_id]);
     }
 
-    // Hämta alla delade varukorgar för användare
+    // Retrieve all shared carts for user
     public static function get_shared_carts(WP_REST_Request $request)
     {
         $user_id = get_current_user_id();
@@ -136,7 +136,7 @@ class Extralsc_WSC_API
         return rest_ensure_response($shared_carts);
     }
 
-    // Skapa session för varukorg
+    // Create session for cart
     public static function create_session(WP_REST_Request $request)
     {
         $cart_id = $request->get_param('cart_id');
@@ -150,7 +150,7 @@ class Extralsc_WSC_API
         return rest_ensure_response(['session_id' => $session->session_id]);
     }
 
-    // Hämta session för varukorg
+    // Retrieve session for cart
     public static function get_session(WP_REST_Request $request)
     {
         $cart_id = $request->get_param('cart_id');
@@ -169,23 +169,23 @@ class Extralsc_WSC_API
             return new WP_Error('missing_param', 'Cart ID saknas', array('status' => 400));
         }
 
-        // Hämta varukorgens varor baserat på cart_id (här ska en funktion som hämtar varor implementeras)
+        // Retrieve cart items based on cart_id (a function to fetch items should be implemented here)
         $cart_items = Extralsc_WSC_Cart_Item::get_items_by_cart_id($cart_id);
         if (!$cart_items) {
             return new WP_Error('no_cart', 'Varukorgen är tom eller existerar inte', array('status' => 400));
         }
 
-        // Töm WooCommerce-varukorgen
+        // Empty the WooCommerce cart
         WC()->cart->empty_cart();
 
-        // Lägg till varje varupost i WooCommerce-varukorgen
+        // Add each product item to the WooCommerce cart
         foreach ($cart_items as $item) {
             WC()->cart->add_to_cart($item->product_id, $item->quantity);
         }
 
-        return rest_ensure_response(['success' => true, 'message' => 'Produkter har lagts till i varukorgen']);
+        return rest_ensure_response(['success' => true, 'message' => 'Products have been added to the cart']);
     }
 }
 
-// Registrera API-rutter när pluginet laddas
+// Register API routes when the plugin loads
 add_action('rest_api_init', array('Extralsc_WSC_API', 'register_routes'));

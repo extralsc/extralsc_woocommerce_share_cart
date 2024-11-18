@@ -21,7 +21,7 @@ class Extralsc_WSC_Cart_Session {
             "{$wpdb->prefix}extralsc_wsc_cart_sessions",
             [
                 'cart_id' => $cart_id,
-                'session_data' => json_encode($session_data), // lagrar sessiondata som JSON
+                'session_data' => json_encode($session_data), // Store session data as JSON
                 'created_at' => $created_at
             ]
         );
