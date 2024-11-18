@@ -41,6 +41,7 @@ class Extralsc_WSC_Cart_Item
             ]
         );
 
+        // !!! Add error handling here
         var_dump($insert);
         return;
     }

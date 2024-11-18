@@ -36,6 +36,7 @@ function extralsc_wsc_activate_plugin()
     $sql_carts = "
     CREATE TABLE IF NOT EXISTS {$wpdb->prefix}extralsc_wsc_carts (
         cart_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        cart_token VARCHAR(255) NOT NULL,
         user_id VARCHAR(255) NOT NULL,
         created_at DATETIME NOT NULL,
         updated_at DATETIME NOT NULL,
@@ -212,12 +213,11 @@ function extralsc_display_cart_by_id_shortcode_legacy()
     }
 }
 
-function extralsc_display_cart_by_id_shortcode()
+function extralsc_display_cart_by_token_shortcode()
 {
-    if (isset($_GET['cart_id'])) {
-        $cart_id = sanitize_text_field($_GET['cart_id']); // Sanitize input
-
-        $cart_data = extralsc_get_cart_data($cart_id);
+    if (isset($_GET['ctoken'])) {
+        $cart_token = sanitize_text_field($_GET['ctoken']);
+        $cart_data = extralsc_get_cart_data($cart_token);
 
         if ($cart_data) {
             WC()->cart->empty_cart();
@@ -239,19 +239,17 @@ function extralsc_display_cart_by_id_shortcode()
         return '<p>' . __('Please enter a valid cart ID', 'extralsc-wsc') . '</p>';
     }
 }
-
-
-add_shortcode('extralsc_wsc_cart', 'extralsc_display_cart_by_id_shortcode');
+add_shortcode('extralsc_wsc_cart', 'extralsc_display_cart_by_token_shortcode');
 
 // Function to retrieve cart data and product information
-function extralsc_get_cart_data($cart_id)
+function extralsc_get_cart_data($cart_token)
 {
     global $wpdb;
-    $cart = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}extralsc_wsc_carts WHERE cart_id = %s", $cart_id));
+    $cart = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}extralsc_wsc_carts WHERE cart_token = %s", $cart_token));
     if ($cart) {
         $cart_items = $wpdb->get_results($wpdb->prepare(
             "SELECT * FROM {$wpdb->prefix}extralsc_wsc_cart_items WHERE cart_id = %s",
-            $cart_id
+            $cart->cart_id
         ));
         if ($cart_items) {
             $cart->items = [];

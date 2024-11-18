@@ -24,7 +24,7 @@ This plugin provides a custom functionality where the user can share their cart 
 
 ### Display Shared Cart
 
-To display the shared cart, you can use the shortcode `[extralsc_wsc_cart]` in any page or post. You need to pass the `cart_id` as a URL parameter, e.g., `yourwebsite.com/shared-cart?cart_id=123`. The plugin will retrieve the cart's contents and display it with product details.
+To display the shared cart, you can use the shortcode `[extralsc_wsc_cart]` in any page or post. You need to pass the `ctoken` as a URL parameter, e.g., `yourwebsite.com/shared-cart?ctoken=123`. The plugin will retrieve the cart's contents and display it with product details.
 
 ### Add to Cart and Checkout
 
@@ -38,18 +38,18 @@ You can use the following shortcode in your pages or posts:
 [extralsc_wsc_cart]
 ```
 
-This will display the contents of the shared cart, provided the `cart_id` is passed in the URL.
+This will display the contents of the shared cart, provided the `ctoken` is passed in the URL.
 
 For example:
-- URL: `https://yourwebsite.com/shared-cart?cart_id=123`
+- URL: `https://yourwebsite.com/shared-cart?ctoken=123`
 - Shortcode used: `[extralsc_wsc_cart]`
 
 ### Creating Shared Cart Links
 
-To share a cart, you can generate the URL based on the cart's `cart_id`. The plugin allows users to access shared carts via a URL like:
+To share a cart, you can generate the URL based on the cart's `ctoken`. The plugin allows users to access shared carts via a URL like:
 
 ```plaintext
-https://yourwebsite.com/shared-cart?cart_id=123
+https://yourwebsite.com/shared-cart?ctoken=123
 ```
 
 Replace `123` with the actual cart ID that is being shared.
@@ -61,15 +61,15 @@ The **WooCommerce Share Cart System** also provides custom **API endpoints** tha
 ### Available API Endpoints
 
 1. **Get Cart Data by Cart ID**
-   - **Endpoint**: `/wp-json/extralsc-wsc/v1/cart/{cart_id}`
+   - **Endpoint**: `/wp-json/extralsc-wsc/v1/cart/{ctoken}`
    - **Method**: `GET`
-   - **Description**: Retrieve the details of a cart by its `cart_id`.
+   - **Description**: Retrieve the details of a cart by its `ctoken`.
    - **Parameters**:
-     - `cart_id`: The ID of the cart you want to retrieve.
+     - `ctoken`: The ID of the cart you want to retrieve.
    - **Response Example**:
      ```json
      {
-       "cart_id": "123",
+       "ctoken": "123",
        "items": [
          {
            "product_id": "12345",
@@ -96,14 +96,14 @@ The **WooCommerce Share Cart System** also provides custom **API endpoints** tha
    - **Method**: `POST`
    - **Description**: Create a new cart or update an existing cart by adding items to it.
    - **Parameters** (in JSON format):
-     - `cart_id` (optional): If the cart already exists, specify the `cart_id` to update it.
+     - `ctoken` (optional): If the cart already exists, specify the `ctoken` to update it.
      - `items`: An array of items to be added to the cart, each with the following properties:
        - `product_id`: The ID of the product to add.
        - `quantity`: The number of items to add.
    - **Example Request Body**:
      ```json
      {
-       "cart_id": "123",
+       "ctoken": "123",
        "items": [
          {
            "product_id": "12345",
@@ -121,16 +121,16 @@ The **WooCommerce Share Cart System** also provides custom **API endpoints** tha
      {
        "status": "success",
        "message": "Cart updated successfully",
-       "cart_id": "123"
+       "ctoken": "123"
      }
      ```
 
 3. **Delete Cart**
-   - **Endpoint**: `/wp-json/extralsc-wsc/v1/cart/{cart_id}`
+   - **Endpoint**: `/wp-json/extralsc-wsc/v1/cart/{ctoken}`
    - **Method**: `DELETE`
    - **Description**: Delete the cart and all associated items.
    - **Parameters**:
-     - `cart_id`: The ID of the cart to be deleted.
+     - `ctoken`: The ID of the cart to be deleted.
    - **Response Example**:
      ```json
      {
@@ -170,12 +170,12 @@ This plugin consists of several key components:
 
 Here’s how you can use the plugin:
 
-1. **Share a Cart**: A user can share their cart by copying the URL with the `cart_id` parameter and sending it to another user.
+1. **Share a Cart**: A user can share their cart by copying the URL with the `ctoken` parameter and sending it to another user.
 2. **View and Proceed to Checkout**: The recipient of the shared cart can open the URL and view the cart's contents. They can then proceed to checkout with all the items already added to their WooCommerce cart.
 
 ## Troubleshooting
 
-- **Cart Not Found**: If a shared cart is not found, make sure the correct `cart_id` is being passed in the URL.
+- **Cart Not Found**: If a shared cart is not found, make sure the correct `ctoken` is being passed in the URL.
   
 - **Products Not Adding to Cart**: Ensure that the products exist and that the WooCommerce cart is properly initialized. If there is an issue with adding products, check that the product IDs are valid and the quantities are correctly set.
 

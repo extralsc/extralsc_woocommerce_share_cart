@@ -79,13 +79,20 @@ class Extralsc_WSC_API
         }
 
         $cart = Extralsc_WSC_Cart::create_cart($user_id);
-        return rest_ensure_response(['cart_id' => $cart->cart_id]);
+        return rest_ensure_response(['cart_id' => $cart->cart_id, 'cart_token' => $cart->cart_token]);
     }
 
     // Add product to cart
     public static function add_to_cart(WP_REST_Request $request)
     {
-        $cart_id = $request->get_param('cart_id');
+        global $wpdb;
+        
+        $cart_token = $request->get_param('cart_token');
+        
+        $cartIdQuery = $wpdb->prepare("SELECT cart_id FROM {$wpdb->prefix}extralsc_wsc_carts WHERE cart_token = %d", $cart_token);
+        $cartRow = $wpdb->get_row($cartIdQuery);
+        $cart_id = $cartRow->cart_id;
+
         $product_id = $request->get_param('product_id');
         $quantity = $request->get_param('quantity');
 
