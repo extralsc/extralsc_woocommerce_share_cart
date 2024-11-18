@@ -170,7 +170,7 @@ add_action('template_redirect', 'extralsc_wsc_template_redirect');
 function extralsc_display_cart_by_id_shortcode_legacy()
 {
     if (isset($_GET['cart_id'])) {
-        $cart_id = sanitize_text_field($_GET['cart_id']); // Sanera input
+        $cart_id = sanitize_text_field($_GET['cart_id']); // Sanitize input
 
         $cart_data = extralsc_get_cart_data($cart_id);
 
@@ -178,46 +178,44 @@ function extralsc_display_cart_by_id_shortcode_legacy()
             $total = 0;
             WC()->cart->empty_cart();
 
-
-            $output = '<h2>Innehåll i kundvagnen</h2>';
+            $output = '<h2>' . __('Cart contents', 'extralsc-wsc') . '</h2>';
             foreach ($cart_data->items as $item) {
                 $item = (object) $item;
-                // Lägg till produkten i WooCommerce varukorgen
+                // Add the product to WooCommerce cart
                 WC()->cart->add_to_cart($item->product_id, $item->quantity);
                 $total = $total + ($item->price_incl_tax * $item->quantity);
-                // Visa produktinformation
+                // Display product information
                 $output .= '<div>';
                 $output .= '<img src="' . $item->image_url . '" width="50" height="50" />';
-                $output .= '<p>Produktnamn: ' . $item->name . '</p>';
-                $output .= '<p>Pris (exkl. moms): ' . wc_price($item->price_excl_tax) . '</p>';
-                $output .= '<p>Pris (inkl. moms): ' . wc_price($item->price_incl_tax) . '</p>';
-                $output .= '<p>Momsbelopp: ' . wc_price($item->tax_amount) . '</p>';
-                $output .= '<p>Kvantitet: ' . $item->quantity . '</p>';
-                $output .= '<p>Totalpris: ' . $item->total_price . '</p>';
+                $output .= '<p>' . __('Product name:', 'extralsc-wsc') . ' ' . $item->name . '</p>';
+                $output .= '<p>' . __('Price (excl. tax):', 'extralsc-wsc') . ' ' . wc_price($item->price_excl_tax) . '</p>';
+                $output .= '<p>' . __('Price (incl. tax):', 'extralsc-wsc') . ' ' . wc_price($item->price_incl_tax) . '</p>';
+                $output .= '<p>' . __('Tax amount:', 'extralsc-wsc') . ' ' . wc_price($item->tax_amount) . '</p>';
+                $output .= '<p>' . __('Quantity:', 'extralsc-wsc') . ' ' . $item->quantity . '</p>';
+                $output .= '<p>' . __('Total price:', 'extralsc-wsc') . ' ' . $item->total_price . '</p>';
                 $output .= '</div><hr>';
             }
 
-            $output .= '<b>Totalt inkl. moms: ' . wc_price($total) . '</b><hr />';
+            $output .= '<b>' . __('Total including tax:', 'extralsc-wsc') . ' ' . wc_price($total) . '</b><hr />';
 
-
-            // Lägg till en knapp för att lägga alla produkter i varukorgen och fortsätt till kassan
+            // Add a button to add all products to the cart and proceed to checkout
             $output .= '<form action="' . esc_url(add_query_arg('add_to_cart_and_checkout', '1', $_SERVER['REQUEST_URI'])) . '" method="POST">';
-            $output .= '<input type="submit" value="Fortsätt och köp">';
+            $output .= '<input type="submit" value="' . __('Proceed to Checkout', 'extralsc-wsc') . '">';
             $output .= '</form>';
 
             return $output;
         } else {
-            return '<p>Kundvagnen kunde inte hittas.</p>';
+            return '<p>' . __('The cart could not be found.', 'extralsc-wsc') . '</p>';
         }
     } else {
-        return '<p>Ingen kundvagn angiven.</p>';
+        return '<p>' . __('No cart ID provided.', 'extralsc-wsc') . '</p>';
     }
 }
 
 function extralsc_display_cart_by_id_shortcode()
 {
     if (isset($_GET['cart_id'])) {
-        $cart_id = sanitize_text_field($_GET['cart_id']); // Sanera input
+        $cart_id = sanitize_text_field($_GET['cart_id']); // Sanitize input
 
         $cart_data = extralsc_get_cart_data($cart_id);
 
@@ -229,17 +227,19 @@ function extralsc_display_cart_by_id_shortcode()
                 WC()->cart->add_to_cart($item->product_id, $item->quantity);
             }
 
-            echo __('Loading...', EXTRALSC__WSC_SLUG);
+            echo __('Loading...', 'extralsc-wsc');
             $cart_url = wc_get_cart_url();
             wp_safe_redirect($cart_url);
+            exit;
             
         } else {
-            return '<p>'. __('Could not find any valid cart', EXTRALSC__WSC_SLUG) .'</p>';
+            return '<p>' . __('Could not find any valid cart', 'extralsc-wsc') . '</p>';
         }
     } else {
-        return '<p>'. __('Please enter valid cart id', EXTRALSC__WSC_SLUG) .'</p>';
+        return '<p>' . __('Please enter a valid cart ID', 'extralsc-wsc') . '</p>';
     }
 }
+
 
 add_shortcode('extralsc_wsc_cart', 'extralsc_display_cart_by_id_shortcode');
 
