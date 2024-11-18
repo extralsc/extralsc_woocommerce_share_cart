@@ -118,6 +118,26 @@ function extralsc_wsc_activate_plugin()
 }
 register_activation_hook(__FILE__, 'extralsc_wsc_activate_plugin');
 
+function extralsc_wsc_uninstall_plugin()
+{
+    global $wpdb;
+
+    // Lista över tabeller som ska tas bort
+    $tables = [
+        "{$wpdb->prefix}extralsc_wsc_carts",
+        "{$wpdb->prefix}extralsc_wsc_products",
+        "{$wpdb->prefix}extralsc_wsc_cart_items",
+        "{$wpdb->prefix}extralsc_wsc_cart_sharing",
+        "{$wpdb->prefix}extralsc_wsc_cart_sessions"
+    ];
+
+    // Ta bort varje tabell i listan
+    foreach ($tables as $table) {
+        $wpdb->query("DROP TABLE IF EXISTS $table");
+    }
+}
+register_uninstall_hook(__FILE__, 'extralsc_wsc_uninstall_plugin');
+
 // REST API slutpunkter
 add_action('rest_api_init', array('Extralsc_WSC_API', 'register_routes'));
 
