@@ -68,6 +68,17 @@ class Extralsc_WSC_API
         ));
     }
 
+    public static function get_cart_id_from_token($cart_token)
+    {
+        global $wpdb;
+        
+        $cartIdQuery = $wpdb->prepare("SELECT cart_id FROM {$wpdb->prefix}extralsc_wsc_carts WHERE cart_token = %d", $cart_token);
+        $cartRow = $wpdb->get_row($cartIdQuery);
+        $cart_id = $cartRow->cart_id;
+
+        return $cart_id;
+    }
+
     // Create cart
     public static function create_cart(WP_REST_Request $request)
     {
@@ -85,13 +96,8 @@ class Extralsc_WSC_API
     // Add product to cart
     public static function add_to_cart(WP_REST_Request $request)
     {
-        global $wpdb;
-        
         $cart_token = $request->get_param('cart_token');
-        
-        $cartIdQuery = $wpdb->prepare("SELECT cart_id FROM {$wpdb->prefix}extralsc_wsc_carts WHERE cart_token = %d", $cart_token);
-        $cartRow = $wpdb->get_row($cartIdQuery);
-        $cart_id = $cartRow->cart_id;
+        $cart_id = self::get_cart_id_from_token($cart_token);
 
         $product_id = $request->get_param('product_id');
         $quantity = $request->get_param('quantity');
@@ -173,7 +179,7 @@ class Extralsc_WSC_API
     public static function add_to_woocommerce_cart(WP_REST_Request $request) {
         $cart_id = $request->get_param('cart_id');
         if (!$cart_id) {
-            return new WP_Error('missing_param', 'Cart ID saknas', array('status' => 400));
+            return new WP_Error('missing_param', 'Cart ID is missing', array('status' => 400));
         }
 
         // Retrieve cart items based on cart_id (a function to fetch items should be implemented here)
