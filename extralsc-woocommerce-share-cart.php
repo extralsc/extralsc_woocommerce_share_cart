@@ -7,7 +7,7 @@
  * Author: Extralsc
  * Author URI: https://github.com/extralsc
  * License: GPL2
- * Text Domain: extralsc
+ * Text Domain: extralsc-wsc
  */
 
 if (!defined('ABSPATH')) {
@@ -15,11 +15,12 @@ if (!defined('ABSPATH')) {
 }
 
 
-// Definiera pluginets version och katalog
+// Define the plugin version and directory
 define( 'EXTRALSC_WSC_PLUGIN_VERSION', '1.0' );
 define( 'EXTRALSC__WSC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'EXTRALSC__WSC_SLUG', 'extralsc-wsc');
 
-// Ladda alla inkluderade filer
+// Load all included files
 require_once plugin_dir_path(__FILE__) . 'includes/class-cart.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-product.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-cart-item.php';
@@ -27,13 +28,11 @@ require_once plugin_dir_path(__FILE__) . 'includes/class-cart-sharing.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-cart-session.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-api.php';
 
-// Aktivera plugin
 function extralsc_wsc_activate_plugin()
 {
     global $wpdb;
     $charset_collate = $wpdb->get_charset_collate();
 
-    // SQL för att skapa tabeller
     $sql_carts = "
     CREATE TABLE IF NOT EXISTS {$wpdb->prefix}extralsc_wsc_carts (
         cart_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -138,17 +137,17 @@ function extralsc_wsc_uninstall_plugin()
 }
 register_uninstall_hook(__FILE__, 'extralsc_wsc_uninstall_plugin');
 
-// REST API slutpunkter
+// REST API endpoints
 add_action('rest_api_init', array('Extralsc_WSC_API', 'register_routes'));
 
-// Rewrite-regel för delbar varukorg
+// Rewrite rule for shareable cart
 function extralsc_wsc_add_rewrite_rule()
 {
     add_rewrite_rule('^extralsc-wsc/([0-9]+)/?', 'index.php?extralsc_cart_id=$matches[1]', 'top');
 }
 add_action('init', 'extralsc_wsc_add_rewrite_rule');
 
-// Ny query var för delade varukorgar
+// New query var for shared carts
 function extralsc_wsc_add_query_vars($vars)
 {
     $vars[] = 'extralsc_cart_id';
@@ -156,7 +155,7 @@ function extralsc_wsc_add_query_vars($vars)
 }
 add_filter('query_vars', 'extralsc_wsc_add_query_vars');
 
-// Lägg till en template redirect för delad kundvagn
+// Add a template redirect for shared cart
 function extralsc_wsc_template_redirect()
 {
     $cart_id = get_query_var('extralsc_cart_id');
@@ -167,7 +166,7 @@ function extralsc_wsc_template_redirect()
 }
 add_action('template_redirect', 'extralsc_wsc_template_redirect');
 
-// Shortcode för att visa kundvagn baserat på cart_id
+// Shortcode to display cart based on cart_id
 function extralsc_display_cart_by_id_shortcode_legacy()
 {
     if (isset($_GET['cart_id'])) {
@@ -230,44 +229,38 @@ function extralsc_display_cart_by_id_shortcode()
                 WC()->cart->add_to_cart($item->product_id, $item->quantity);
             }
 
-            echo __('Loading...', 'extralsc-wsc');
+            echo __('Loading...', EXTRALSC__WSC_SLUG);
             $cart_url = wc_get_cart_url();
             wp_safe_redirect($cart_url);
             
         } else {
-            return '<p>Kundvagnen kunde inte hittas.</p>';
+            return '<p>'. __('Could not find any valid cart', EXTRALSC__WSC_SLUG) .'</p>';
         }
     } else {
-        return '<p>Ingen kundvagn angiven.</p>';
+        return '<p>'. __('Please enter valid cart id', EXTRALSC__WSC_SLUG) .'</p>';
     }
 }
 
-add_shortcode('display_cart', 'extralsc_display_cart_by_id_shortcode');
+add_shortcode('extralsc_wsc_cart', 'extralsc_display_cart_by_id_shortcode');
 
-// Funktion för att hämta kundvagnsdata och produktinformation
+// Function to retrieve cart data and product information
 function extralsc_get_cart_data($cart_id)
 {
     global $wpdb;
-
-    // Hämta kundvagnsdata
     $cart = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}extralsc_wsc_carts WHERE cart_id = %s", $cart_id));
-
     if ($cart) {
         $cart_items = $wpdb->get_results($wpdb->prepare(
             "SELECT * FROM {$wpdb->prefix}extralsc_wsc_cart_items WHERE cart_id = %s",
             $cart_id
         ));
-
         if ($cart_items) {
             $cart->items = [];
-
             foreach ($cart_items as $item) {
                 $product = wc_get_product($item->product_id);
                 if ($product) {
-                    // Hämta priser inklusive och exklusive moms
                     $price_excl_tax = $product->get_price_excluding_tax();
                     $price_incl_tax = $product->get_price_including_tax();
-                    $tax_amount = $price_incl_tax - $price_excl_tax; // Beräkna moms
+                    $tax_amount = $price_incl_tax - $price_excl_tax;
 
                     $cart->items[] = [
                         'product_id' => $item->product_id,
@@ -277,7 +270,7 @@ function extralsc_get_cart_data($cart_id)
                         'quantity' => $item->quantity,
                         'total_price' => wc_price($price_incl_tax * $item->quantity) . ' inkl. moms.',
                         'image_url' => wp_get_attachment_url($product->get_image_id()),
-                        'tax_amount' => $tax_amount // Momsbelopp
+                        'tax_amount' => $tax_amount
                     ];
                 }
             }
@@ -297,12 +290,9 @@ function extralsc_add_products_to_cart_and_redirect()
             foreach ($cart_data->items as $item) {
                 $product_id = wc_get_product_id_by_sku($item->sku); // Eller använd product_id direkt om du har det
                 $quantity = $item->quantity;
-
-                // Lägg till produkterna i WooCommerce varukorg
                 WC()->cart->add_to_cart($product_id, $quantity);
             }
 
-            // Skicka användaren vidare till kassan
             wp_redirect(wc_get_checkout_url());
             exit;
         }
